@@ -48,7 +48,7 @@ class AppVisaoComputacional(tk.Tk):
         if not self.caminho_imagem:
             return
 
-        self.imagem_original = cv2.imread(self.caminho_imagem)
+        self.imagem_original = cv2.imdecode(np.fromfile(self.caminho_imagem, dtype=np.uint8), cv2.IMREAD_COLOR)
         self.imagem_processada = self.imagem_original.copy()
         self.exibir_imagem(self.imagem_processada)
 
@@ -104,33 +104,32 @@ class AppVisaoComputacional(tk.Tk):
 
     # Novo método que chama as funções de blending
     def executar_blending(self):
-        # 1. Carregar as 3 imagens necessárias
+        
         messagebox.showinfo("Instrução", "Por favor, selecione a Imagem A (ex: maçã).")
         caminho_a = filedialog.askopenfilename(title="Selecione a Imagem A")
         if not caminho_a: return
-        self.imagem_a = cv2.imread(caminho_a)
+        self.imagem_a = cv2.imdecode(np.fromfile(caminho_a, dtype=np.uint8), cv2.IMREAD_COLOR)
         
         messagebox.showinfo("Instrução", "Agora, selecione a Imagem B (ex: laranja).")
         caminho_b = filedialog.askopenfilename(title="Selecione a Imagem B")
         if not caminho_b: return
-        self.imagem_b = cv2.imread(caminho_b)
+        self.imagem_b = cv2.imdecode(np.fromfile(caminho_b, dtype=np.uint8), cv2.IMREAD_COLOR)
 
         messagebox.showinfo("Instrução", "Por fim, selecione a Máscara.")
         caminho_m = filedialog.askopenfilename(title="Selecione a Máscara")
         if not caminho_m: return
-        self.mascara = cv2.imread(caminho_m, cv2.IMREAD_GRAYSCALE) # Carrega em tons de cinza
+        self.mascara   = cv2.imdecode(np.fromfile(caminho_m, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
 
-        # 2. Verifica se tudo foi carregado
         if self.imagem_a is None or self.imagem_b is None or self.mascara is None:
             messagebox.showerror("Erro", "É necessário carregar as duas imagens e a máscara!")
             return
 
         self.imagem_processada = realizar_blending_com_piramides(self.imagem_a, self.imagem_b, self.mascara)
 
-        # 4. Exibe o resultado
+        
         self.exibir_imagem(self.imagem_processada)
         
-        # Define a imagem A como a "original" para poder usar o botão "Restaurar"
+        
         self.imagem_original = self.imagem_a.copy()
 
 def realizar_blending_com_piramides(img_a, img_b, mascara, niveis=6):
